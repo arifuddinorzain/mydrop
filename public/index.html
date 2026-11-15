@@ -7,10 +7,16 @@
   <link rel="stylesheet" href="/styles.css" />
 </head>
 <body>
+  <div class="bg-ambient" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+  </div>
+
   <main class="app">
     <header class="brand">
       <div class="brand-logo" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 3v12" />
           <path d="m7 10 5 5 5-5" />
           <path d="M5 19h14" />
@@ -25,7 +31,7 @@
       <div class="action-grid">
         <button id="btn-go-send" class="action-card action-send" type="button">
           <span class="action-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 19V5" />
               <path d="m5 12 7-7 7 7" />
             </svg>
@@ -36,7 +42,7 @@
 
         <button id="btn-go-receive" class="action-card action-receive" type="button">
           <span class="action-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 5v14" />
               <path d="m19 12-7 7-7-7" />
             </svg>
@@ -60,8 +66,11 @@
       <div id="receive-error" class="error-banner hidden" role="alert"></div>
 
       <div id="receive-qr-box" class="panel qr-panel">
-        <div class="qr-frame">
-          <canvas id="qr-canvas"></canvas>
+        <div class="qr-sonar">
+          <span class="sonar-ring" aria-hidden="true"></span>
+          <div class="qr-frame">
+            <canvas id="qr-canvas"></canvas>
+          </div>
         </div>
         <p class="hint">Imbas QR ini dari peranti penghantar</p>
         <div class="code-row">
@@ -72,12 +81,32 @@
       </div>
 
       <div id="receive-files-box" class="panel files-panel hidden">
+        <div id="receive-transfer-anim" class="transfer-hero hidden">
+          <div class="stream-track" aria-hidden="true">
+            <div class="node-pill">Pengirim</div>
+            <div class="stream-lane">
+              <span class="packet p1"></span>
+              <span class="packet p2"></span>
+              <span class="packet p3"></span>
+            </div>
+            <div class="node-pill active">Anda</div>
+          </div>
+          <div class="overall-head">
+            <span id="receive-overall-label" class="overall-label">Sedang menerima...</span>
+            <span id="receive-overall-pct" class="overall-pct">0%</span>
+          </div>
+          <div class="progress-track lg">
+            <div id="receive-overall-bar" class="progress-fill active-shimmer"></div>
+          </div>
+        </div>
+
         <div class="panel-head">
           <span class="panel-title">Fail diterima</span>
           <button id="btn-download-all" class="btn-mini hidden" type="button">Muat turun semua</button>
         </div>
         <div id="receive-empty" class="empty-state">
-          Menunggu pengirim pilih fail...
+          <div class="radar-loader" aria-hidden="true"><span></span><span></span></div>
+          <p>Menunggu pengirim pilih fail...</p>
         </div>
         <ul id="receive-list" class="file-list"></ul>
         <p class="ephemeral-note">Tiada fail disimpan. Hilang automatik bila refresh.</p>
@@ -100,7 +129,9 @@
       <div id="send-scan-stage" class="panel scan-panel">
         <div id="camera-wrap" class="camera-wrap">
           <video id="qr-video" playsinline muted autoplay></video>
-          <div class="scan-reticle" aria-hidden="true"></div>
+          <div class="scan-reticle" aria-hidden="true">
+            <span class="scan-laser"></span>
+          </div>
           <div id="camera-fallback-msg" class="camera-msg hidden"></div>
         </div>
         <canvas id="qr-scan-canvas" hidden></canvas>
@@ -128,10 +159,29 @@
 
       <!-- STEP 2: SELECT & SEND FILES -->
       <div id="send-files-stage" class="panel files-panel hidden">
+        <div id="send-transfer-anim" class="transfer-hero hidden">
+          <div class="stream-track" aria-hidden="true">
+            <div class="node-pill active">Anda</div>
+            <div class="stream-lane">
+              <span class="packet p1"></span>
+              <span class="packet p2"></span>
+              <span class="packet p3"></span>
+            </div>
+            <div class="node-pill">Penerima</div>
+          </div>
+          <div class="overall-head">
+            <span id="send-overall-label" class="overall-label">Sedang menghantar...</span>
+            <span id="send-overall-pct" class="overall-pct">0%</span>
+          </div>
+          <div class="progress-track lg">
+            <div id="send-overall-bar" class="progress-fill active-shimmer"></div>
+          </div>
+        </div>
+
         <label id="drop-zone" class="drop-zone">
           <input id="file-input" type="file" multiple hidden />
           <span class="drop-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 5v14" />
               <path d="M5 12h14" />
             </svg>

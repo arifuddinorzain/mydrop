@@ -21,6 +21,10 @@
   const receiveCodeEl = $('receive-code');
   const btnCopyLink = $('btn-copy-link');
   const receiveFilesBox = $('receive-files-box');
+  const receiveTransferAnim = $('receive-transfer-anim');
+  const receiveOverallLabel = $('receive-overall-label');
+  const receiveOverallPct = $('receive-overall-pct');
+  const receiveOverallBar = $('receive-overall-bar');
   const receiveEmpty = $('receive-empty');
   const receiveList = $('receive-list');
   const btnDownloadAll = $('btn-download-all');
@@ -37,6 +41,10 @@
   const manualCodeInput = $('manual-code-input');
   const qrImageInput = $('qr-image-input');
   const sendFilesStage = $('send-files-stage');
+  const sendTransferAnim = $('send-transfer-anim');
+  const sendOverallLabel = $('send-overall-label');
+  const sendOverallPct = $('send-overall-pct');
+  const sendOverallBar = $('send-overall-bar');
   const dropZone = $('drop-zone');
   const fileInput = $('file-input');
   const sendList = $('send-list');
@@ -150,6 +158,23 @@
     }
   }
 
+  function setHeroProgress(heroEl, labelEl, pctEl, barEl, pct, labelText, completed) {
+    heroEl.classList.remove('hidden');
+    heroEl.classList.toggle('completed', Boolean(completed));
+    labelEl.textContent = labelText;
+    pctEl.textContent = `${pct}%`;
+    barEl.style.width = `${pct}%`;
+    barEl.classList.toggle('done', Boolean(completed));
+  }
+
+  function resetHero(heroEl, pctEl, barEl) {
+    heroEl.classList.add('hidden');
+    heroEl.classList.remove('completed');
+    pctEl.textContent = '0%';
+    barEl.style.width = '0%';
+    barEl.classList.remove('done');
+  }
+
   function resetAll() {
     stopScanner();
     if (currentSession) {
@@ -177,6 +202,8 @@
     fileInput.value = '';
     qrImageInput.value = '';
     currentShareOrigin = location.origin;
+    resetHero(receiveTransferAnim, receiveOverallPct, receiveOverallBar);
+    resetHero(sendTransferAnim, sendOverallPct, sendOverallBar);
     clearInlineErrors();
   }
 
@@ -219,23 +246,45 @@
           name: fileInfo.name,
           size: fileInfo.size,
           mime: fileInfo.mime,
+          receivedBytes: 0,
           blobUrl: null,
           done: false,
         };
         receivedFiles.push(item);
         appendReceiveItem(item);
+        setHeroProgress(
+          receiveTransferAnim,
+          receiveOverallLabel,
+          receiveOverallPct,
+          receiveOverallBar,
+          0,
+          `Menerima ${fileInfo.name}...`,
+          false
+        );
       },
       onReceiveProgress(fileId, receivedBytes, totalBytes) {
+        const entry = receivedFiles.find((f) => f.id === fileId);
+        if (entry) entry.receivedBytes = receivedBytes;
         const el = document.getElementById(`rx-${fileId}`);
         if (!el) return;
         const pct = totalBytes > 0 ? Math.min(100, Math.round((receivedBytes / totalBytes) * 100)) : 100;
         el.querySelector('.progress-fill').style.width = `${pct}%`;
         el.querySelector('.file-sub').textContent = `${formatBytes(receivedBytes)} / ${formatBytes(totalBytes)} (${pct}%)`;
+        setHeroProgress(
+          receiveTransferAnim,
+          receiveOverallLabel,
+          receiveOverallPct,
+          receiveOverallBar,
+          pct,
+          `Sedang menerima ${entry?.name || 'fail'}...`,
+          false
+        );
       },
       onReceiveComplete(fileInfo, blobUrl) {
         const entry = receivedFiles.find((f) => f.id === fileInfo.id);
         if (entry) {
           entry.blobUrl = blobUrl;
+          entry.receivedBytes = fileInfo.size;
           entry.done = true;
         }
         const el = document.getElementById(`rx-${fileInfo.id}`);
@@ -264,6 +313,18 @@
         }
 
         const completedCount = receivedFiles.filter((f) => f.done).length;
+        const allDone = receivedFiles.every((f) => f.done);
+        if (allDone) {
+          setHeroProgress(
+            receiveTransferAnim,
+            receiveOverallLabel,
+            receiveOverallPct,
+            receiveOverallBar,
+            100,
+            `${completedCount} fail diterima ✓`,
+            true
+          );
+        }
         if (completedCount >= 2) {
           btnDownloadAll.classList.remove('hidden');
         }
@@ -429,15 +490,34 @@
         sendFilesStage.classList.remove('hidden');
       },
       onSendProgress(fileId, sentBytes, totalBytes) {
+        const entry = sendQueue.find((f) => f.id === fileId);
+        if (entry) entry.sentBytes = sentBytes;
         const el = document.getElementById(`tx-${fileId}`);
         if (!el) return;
         const pct = totalBytes > 0 ? Math.min(100, Math.round((sentBytes / totalBytes) * 100)) : 100;
         el.querySelector('.progress-fill').style.width = `${pct}%`;
         el.querySelector('.file-sub').textContent = `${formatBytes(sentBytes)} / ${formatBytes(totalBytes)} (${pct}%)`;
+
+        const activeBatch = sendQueue.filter((f) => f.status === 'sending' || f.status === 'done');
+        const batchTotal = activeBatch.reduce((acc, f) => acc + f.file.size, 0);
+        const batchSent = activeBatch.reduce((acc, f) => acc + (f.status === 'done' ? f.file.size : (f.sentBytes || 0)), 0);
+        const overallPct = batchTotal > 0 ? Math.min(100, Math.round((batchSent / batchTotal) * 100)) : 100;
+        setHeroProgress(
+          sendTransferAnim,
+          sendOverallLabel,
+          sendOverallPct,
+          sendOverallBar,
+          overallPct,
+          `Sedang menghantar ${entry?.file.name || 'fail'}...`,
+          false
+        );
       },
       onSendComplete(fileId) {
         const entry = sendQueue.find((f) => f.id === fileId);
-        if (entry) entry.status = 'done';
+        if (entry) {
+          entry.status = 'done';
+          entry.sentBytes = entry.file.size;
+        }
         const el = document.getElementById(`tx-${fileId}`);
         if (el) {
           el.querySelector('.progress-fill').style.width = '100%';
@@ -603,16 +683,36 @@
     isSending = true;
     for (const item of pending) {
       item.status = 'sending';
+      item.sentBytes = 0;
       const el = document.getElementById(`tx-${item.id}`);
       el?.querySelector('.btn-remove')?.remove();
     }
     updateSendButton();
+    setHeroProgress(
+      sendTransferAnim,
+      sendOverallLabel,
+      sendOverallPct,
+      sendOverallBar,
+      0,
+      `Memulakan penghantaran (${pending.length} fail)...`,
+      false
+    );
 
     try {
       await currentSession.sendFiles(pending);
+      const totalSentCount = sendQueue.filter((f) => f.status === 'done').length;
+      setHeroProgress(
+        sendTransferAnim,
+        sendOverallLabel,
+        sendOverallPct,
+        sendOverallBar,
+        100,
+        `${totalSentCount} fail selesai dihantar ✓`,
+        true
+      );
       showToast('Semua fail berjaya dihantar');
     } catch (err) {
-      showToast(err.message || 'Gagal menghantar fail');
+      showInlineError(sendErrorEl, err.message || 'Gagal menghantar fail');
     } finally {
       isSending = false;
       updateSendButton();
