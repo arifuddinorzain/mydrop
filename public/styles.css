@@ -411,8 +411,9 @@ body {
   display: none !important;
 }
 
-/* Home Action Cards */
+/* Home Action Cards - Apple Liquid Glass */
 .action-grid {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
@@ -421,21 +422,35 @@ body {
   margin: 0 auto;
 }
 
+.action-grid::before {
+  content: "";
+  position: absolute;
+  inset: -14px -18px;
+  background:
+    radial-gradient(circle at 24% 48%, rgba(56, 189, 248, 0.24), transparent 52%),
+    radial-gradient(circle at 76% 52%, rgba(52, 211, 153, 0.22), transparent 52%),
+    radial-gradient(circle at 50% 80%, rgba(129, 140, 248, 0.16), transparent 60%);
+  filter: blur(20px);
+  z-index: 0;
+  pointer-events: none;
+}
+
 .action-card {
   position: relative;
+  z-index: 1;
   overflow: hidden;
   appearance: none;
-  border: 1px solid rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.85);
   background: linear-gradient(
-    155deg,
-    rgba(255, 255, 255, 0.64) 0%,
-    rgba(255, 255, 255, 0.28) 54%,
-    rgba(255, 255, 255, 0.46) 100%
+    160deg,
+    rgba(255, 255, 255, 0.42) 0%,
+    rgba(226, 232, 240, 0.24) 48%,
+    rgba(255, 255, 255, 0.36) 100%
   );
-  backdrop-filter: blur(26px) saturate(190%);
-  -webkit-backdrop-filter: blur(26px) saturate(190%);
+  backdrop-filter: blur(18px) saturate(190%) contrast(1.06);
+  -webkit-backdrop-filter: blur(18px) saturate(190%) contrast(1.06);
   color: var(--text);
-  border-radius: 24px;
+  border-radius: 26px;
   padding: 24px 14px;
   display: flex;
   flex-direction: column;
@@ -443,15 +458,17 @@ body {
   gap: 9px;
   cursor: pointer;
   box-shadow:
-    0 18px 40px -10px rgba(15, 23, 42, 0.1),
-    0 4px 14px rgba(15, 23, 42, 0.04),
-    inset 0 1.5px 1px rgba(255, 255, 255, 0.95),
-    inset 0 -1px 1px rgba(255, 255, 255, 0.35),
-    inset 1px 0 1px rgba(255, 255, 255, 0.55);
+    0 18px 36px -10px rgba(15, 23, 42, 0.18),
+    0 4px 10px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(15, 23, 42, 0.05),
+    inset 0 2.5px 3px rgba(255, 255, 255, 0.98),
+    inset 0 -3.5px 6px rgba(255, 255, 255, 0.9),
+    inset 2.5px 0 4px rgba(255, 255, 255, 0.72),
+    inset -2.5px 0 4px rgba(255, 255, 255, 0.65),
+    inset 0 12px 24px rgba(100, 116, 139, 0.09);
   transition:
     transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 0.28s ease,
-    border-color 0.28s ease,
     background 0.28s ease;
 }
 
@@ -459,14 +476,80 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    130deg,
-    rgba(255, 255, 255, 0.52) 0%,
-    rgba(255, 255, 255, 0.14) 36%,
-    transparent 62%
-  );
+  background:
+    radial-gradient(120% 55% at 50% 0%, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.12) 48%, transparent 72%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, transparent 45%, rgba(255, 255, 255, 0.28) 100%);
   pointer-events: none;
-  transition: opacity 0.28s ease, transform 0.35s ease;
+  z-index: 0;
+  transition: transform 0.35s ease, opacity 0.28s ease;
+}
+
+.action-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2.2px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(191, 219, 254, 0.55) 28%,
+    rgba(255, 255, 255, 0.16) 50%,
+    rgba(186, 230, 253, 0.75) 75%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.action-send::after {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(147, 197, 253, 0.72) 30%,
+    rgba(255, 255, 255, 0.15) 52%,
+    rgba(125, 211, 252, 0.8) 76%,
+    rgba(255, 255, 255, 1) 100%
+  );
+}
+
+.action-receive::after {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(167, 243, 208, 0.72) 30%,
+    rgba(255, 255, 255, 0.15) 52%,
+    rgba(94, 234, 212, 0.78) 76%,
+    rgba(255, 255, 255, 1) 100%
+  );
+}
+
+.action-send {
+  box-shadow:
+    0 18px 36px -10px rgba(37, 99, 235, 0.24),
+    0 4px 12px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(15, 23, 42, 0.05),
+    inset 0 2.5px 3px rgba(255, 255, 255, 0.98),
+    inset 0 -3.5px 6px rgba(219, 234, 254, 0.95),
+    inset 2.5px 0 4px rgba(255, 255, 255, 0.78),
+    inset -2.5px 0 4px rgba(255, 255, 255, 0.68),
+    inset 0 12px 24px rgba(59, 130, 246, 0.07);
+}
+
+.action-receive {
+  box-shadow:
+    0 18px 36px -10px rgba(16, 185, 129, 0.24),
+    0 4px 12px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(15, 23, 42, 0.05),
+    inset 0 2.5px 3px rgba(255, 255, 255, 0.98),
+    inset 0 -3.5px 6px rgba(209, 250, 229, 0.95),
+    inset 2.5px 0 4px rgba(255, 255, 255, 0.78),
+    inset -2.5px 0 4px rgba(255, 255, 255, 0.68),
+    inset 0 12px 24px rgba(16, 185, 129, 0.07);
 }
 
 .action-card > * {
@@ -476,22 +559,38 @@ body {
 
 .action-card:hover {
   background: linear-gradient(
-    155deg,
-    rgba(255, 255, 255, 0.78) 0%,
-    rgba(255, 255, 255, 0.42) 55%,
-    rgba(255, 255, 255, 0.58) 100%
+    160deg,
+    rgba(255, 255, 255, 0.56) 0%,
+    rgba(241, 245, 249, 0.34) 50%,
+    rgba(255, 255, 255, 0.48) 100%
   );
-  transform: translateY(-5px) scale(1.015);
+  transform: translateY(-5px) scale(1.018);
+}
+
+.action-send:hover {
   box-shadow:
-    0 24px 48px -10px rgba(37, 99, 235, 0.15),
-    0 8px 20px rgba(15, 23, 42, 0.05),
-    inset 0 2px 1.5px rgba(255, 255, 255, 1),
-    inset 0 -1px 1px rgba(255, 255, 255, 0.45);
-  border-color: rgba(255, 255, 255, 0.95);
+    0 24px 44px -8px rgba(37, 99, 235, 0.32),
+    0 6px 14px rgba(15, 23, 42, 0.09),
+    0 0 0 1px rgba(15, 23, 42, 0.05),
+    inset 0 3px 3px rgba(255, 255, 255, 1),
+    inset 0 -4px 7px rgba(191, 219, 254, 0.98),
+    inset 2.5px 0 4px rgba(255, 255, 255, 0.85),
+    inset -2.5px 0 4px rgba(255, 255, 255, 0.75);
+}
+
+.action-receive:hover {
+  box-shadow:
+    0 24px 44px -8px rgba(16, 185, 129, 0.32),
+    0 6px 14px rgba(15, 23, 42, 0.09),
+    0 0 0 1px rgba(15, 23, 42, 0.05),
+    inset 0 3px 3px rgba(255, 255, 255, 1),
+    inset 0 -4px 7px rgba(167, 243, 208, 0.98),
+    inset 2.5px 0 4px rgba(255, 255, 255, 0.85),
+    inset -2.5px 0 4px rgba(255, 255, 255, 0.75);
 }
 
 .action-card:hover::before {
-  transform: translate(4%, 4%);
+  transform: translate(3%, 3%);
 }
 
 .action-card:active {
@@ -504,22 +603,23 @@ body {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
   box-shadow:
-    0 6px 16px rgba(15, 23, 42, 0.05),
-    inset 0 1px 1px rgba(255, 255, 255, 0.85);
+    0 8px 18px rgba(15, 23, 42, 0.08),
+    inset 0 2px 2px rgba(255, 255, 255, 0.95),
+    inset 0 -2px 3px rgba(255, 255, 255, 0.65);
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease;
 }
 
 .action-send .action-icon {
-  background: rgba(37, 99, 235, 0.12);
+  background: linear-gradient(155deg, rgba(219, 234, 254, 0.75), rgba(37, 99, 235, 0.16));
   color: var(--accent);
 }
 
 .action-receive .action-icon {
-  background: rgba(16, 185, 129, 0.13);
+  background: linear-gradient(155deg, rgba(209, 250, 229, 0.78), rgba(16, 185, 129, 0.16));
   color: var(--green);
 }
 
