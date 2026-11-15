@@ -512,6 +512,24 @@ body {
   color: var(--muted);
 }
 
+.privacy-note {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 2px;
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(100, 116, 139, 0.72);
+}
+
+.privacy-note svg {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
 /* Topbar */
 .topbar {
   display: flex;
