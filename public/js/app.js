@@ -34,9 +34,14 @@
   const sendStatus = $('send-status');
   const sendErrorEl = $('send-error');
   const sendScanStage = $('send-scan-stage');
+  const btnScanBack = $('btn-scan-back');
+  const scanStatus = $('scan-status');
+  const scanErrorEl = $('scan-error');
   const qrVideo = $('qr-video');
   const qrScanCanvas = $('qr-scan-canvas');
   const cameraFallbackMsg = $('camera-fallback-msg');
+  const cameraFallbackText = $('camera-fallback-text');
+  const btnRetryCamera = $('btn-retry-camera');
   const manualCodeForm = $('manual-code-form');
   const manualCodeInput = $('manual-code-input');
   const qrImageInput = $('qr-image-input');
@@ -66,6 +71,10 @@
   function showInlineError(el, msg) {
     el.textContent = msg;
     el.classList.remove('hidden');
+    if (el === sendErrorEl) {
+      scanErrorEl.textContent = msg;
+      scanErrorEl.classList.remove('hidden');
+    }
   }
 
   function clearInlineErrors() {
@@ -73,6 +82,8 @@
     receiveErrorEl.classList.add('hidden');
     sendErrorEl.textContent = '';
     sendErrorEl.classList.add('hidden');
+    scanErrorEl.textContent = '';
+    scanErrorEl.classList.add('hidden');
   }
 
   function showToast(text) {
@@ -94,6 +105,11 @@
     pillEl.classList.remove('waiting', 'connected', 'error');
     pillEl.classList.add(state);
     pillEl.querySelector('.status-text').textContent = text;
+    if (pillEl === sendStatus) {
+      scanStatus.classList.remove('waiting', 'connected', 'error');
+      scanStatus.classList.add(state);
+      scanStatus.querySelector('.status-text').textContent = text;
+    }
   }
 
   function formatBytes(bytes) {
@@ -410,10 +426,12 @@
 
   async function startScanner() {
     cameraFallbackMsg.classList.add('hidden');
+    sendScanStage.classList.remove('camera-blocked');
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      cameraFallbackMsg.textContent = 'Kamera perlukan HTTPS. Masukkan kod di bawah atau pilih gambar QR.';
+      cameraFallbackText.textContent = 'Kamera perlukan HTTPS. Masukkan kod di bawah atau pilih gambar QR.';
       cameraFallbackMsg.classList.remove('hidden');
+      sendScanStage.classList.add('camera-blocked');
       return;
     }
 
@@ -426,8 +444,9 @@
       await qrVideo.play();
       scanFrameLoop();
     } catch {
-      cameraFallbackMsg.textContent = 'Akses kamera ditolak. Masukkan kod di bawah atau pilih gambar QR.';
+      cameraFallbackText.textContent = 'Kamera dimatikan atau akses ditolak. Masukkan kod di bawah atau pilih gambar QR.';
       cameraFallbackMsg.classList.remove('hidden');
+      sendScanStage.classList.add('camera-blocked');
     }
   }
 
@@ -724,6 +743,8 @@
   btnGoSend.addEventListener('click', () => startSendFlow());
   btnReceiveBack.addEventListener('click', goHome);
   btnSendBack.addEventListener('click', goHome);
+  btnScanBack.addEventListener('click', goHome);
+  btnRetryCamera.addEventListener('click', () => startScanner());
 
   window.addEventListener('beforeunload', () => {
     resetAll();
