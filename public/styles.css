@@ -778,14 +778,70 @@ body {
 
 /* Transfer Hero Animation */
 .transfer-hero {
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(135deg, #f8faff 0%, #eef4ff 100%);
   border: 1px solid rgba(37, 99, 235, 0.14);
   border-radius: 16px;
-  padding: 14px 16px;
+  padding: 15px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   animation: itemEnter 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.transfer-hero > *:not(.hero-waves) {
+  position: relative;
+  z-index: 1;
+}
+
+.hero-waves {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 54px;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.wave-svg {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 200%;
+  height: 100%;
+  will-change: transform;
+}
+
+.wave-back path {
+  fill: rgba(99, 102, 241, 0.11);
+}
+
+.wave-front path {
+  fill: rgba(37, 99, 235, 0.14);
+}
+
+.wave-back {
+  animation: waveFlow 6.5s linear infinite;
+}
+
+.wave-front {
+  animation: waveFlow 4.2s linear infinite reverse;
+}
+
+.transfer-hero.completed .wave-back path {
+  fill: rgba(16, 185, 129, 0.1);
+}
+
+.transfer-hero.completed .wave-front path {
+  fill: rgba(16, 185, 129, 0.14);
+}
+
+@keyframes waveFlow {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .transfer-hero.completed {
@@ -803,7 +859,7 @@ body {
   font-size: 0.72rem;
   font-weight: 700;
   color: var(--muted);
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--border);
   padding: 4px 10px;
   border-radius: 999px;
@@ -823,9 +879,10 @@ body {
 .stream-lane {
   position: relative;
   flex: 1;
-  height: 18px;
+  height: 24px;
   display: flex;
   align-items: center;
+  justify-content: center;
   overflow: hidden;
 }
 
@@ -838,19 +895,76 @@ body {
   border-radius: 999px;
   background: repeating-linear-gradient(
     90deg,
-    rgba(37, 99, 235, 0.25) 0 6px,
+    rgba(37, 99, 235, 0.22) 0 6px,
     transparent 6px 12px
   );
 }
 
 .transfer-hero.completed .stream-lane::before {
-  background: rgba(16, 185, 129, 0.45);
+  background: rgba(16, 185, 129, 0.4);
+}
+
+.wave-bars {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 22px;
+}
+
+.wave-bars span {
+  width: 3.5px;
+  height: 18px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  transform-origin: center;
+  animation: wavePulseBar 1.05s ease-in-out infinite;
+}
+
+.wave-bars.idle {
+  height: 30px;
+  gap: 5px;
+}
+
+.wave-bars.idle span {
+  width: 4px;
+  height: 24px;
+  opacity: 0.72;
+}
+
+.wave-bars span:nth-child(1) { animation-delay: 0s; }
+.wave-bars span:nth-child(2) { animation-delay: 0.12s; }
+.wave-bars span:nth-child(3) { animation-delay: 0.24s; }
+.wave-bars span:nth-child(4) { animation-delay: 0.36s; }
+.wave-bars span:nth-child(5) { animation-delay: 0.48s; }
+.wave-bars span:nth-child(6) { animation-delay: 0.6s; }
+.wave-bars span:nth-child(7) { animation-delay: 0.72s; }
+
+@keyframes wavePulseBar {
+  0%, 100% {
+    transform: scaleY(0.28);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+.transfer-hero.completed .wave-bars span {
+  background: var(--green);
+  animation: none;
+  transform: scaleY(0.22);
+  opacity: 0.55;
 }
 
 .packet {
   position: absolute;
-  width: 9px;
-  height: 9px;
+  z-index: 2;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   box-shadow: 0 0 10px rgba(37, 99, 235, 0.55);

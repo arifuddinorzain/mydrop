@@ -82,9 +82,20 @@
 
       <div id="receive-files-box" class="panel files-panel hidden">
         <div id="receive-transfer-anim" class="transfer-hero hidden">
+          <div class="hero-waves" aria-hidden="true">
+            <svg class="wave-svg wave-back" viewBox="0 0 900 120" preserveAspectRatio="none">
+              <path d="M0,48 C112.5,88 337.5,8 450,48 C562.5,88 787.5,8 900,48 L900,120 L0,120 Z" />
+            </svg>
+            <svg class="wave-svg wave-front" viewBox="0 0 900 120" preserveAspectRatio="none">
+              <path d="M0,58 C112.5,18 337.5,98 450,58 C562.5,18 787.5,98 900,58 L900,120 L0,120 Z" />
+            </svg>
+          </div>
           <div class="stream-track" aria-hidden="true">
             <div class="node-pill">Pengirim</div>
             <div class="stream-lane">
+              <div class="wave-bars">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
               <span class="packet p1"></span>
               <span class="packet p2"></span>
               <span class="packet p3"></span>
@@ -105,7 +116,9 @@
           <button id="btn-download-all" class="btn-mini hidden" type="button">Muat turun semua</button>
         </div>
         <div id="receive-empty" class="empty-state">
-          <div class="radar-loader" aria-hidden="true"><span></span><span></span></div>
+          <div class="wave-bars idle" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
           <p>Menunggu pengirim pilih fail...</p>
         </div>
         <ul id="receive-list" class="file-list"></ul>
@@ -128,9 +141,20 @@
       <!-- STEP 2: SELECT & SEND FILES -->
       <div id="send-files-stage" class="panel files-panel hidden">
         <div id="send-transfer-anim" class="transfer-hero hidden">
+          <div class="hero-waves" aria-hidden="true">
+            <svg class="wave-svg wave-back" viewBox="0 0 900 120" preserveAspectRatio="none">
+              <path d="M0,48 C112.5,88 337.5,8 450,48 C562.5,88 787.5,8 900,48 L900,120 L0,120 Z" />
+            </svg>
+            <svg class="wave-svg wave-front" viewBox="0 0 900 120" preserveAspectRatio="none">
+              <path d="M0,58 C112.5,18 337.5,98 450,58 C562.5,18 787.5,98 900,58 L900,120 L0,120 Z" />
+            </svg>
+          </div>
           <div class="stream-track" aria-hidden="true">
             <div class="node-pill active">Anda</div>
             <div class="stream-lane">
+              <div class="wave-bars">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
               <span class="packet p1"></span>
               <span class="packet p2"></span>
               <span class="packet p3"></span>
