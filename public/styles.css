@@ -196,7 +196,7 @@ body {
   border-radius: 21px;
   border: 2px solid rgba(37, 99, 235, 0.26);
   pointer-events: none;
-  animation: logoSplashRing 2.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  animation: logoSplashRing 4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
 .brand-logo svg {
@@ -207,15 +207,28 @@ body {
 
 .drop-group {
   transform-box: fill-box;
-  transform-origin: center bottom;
-  animation: waterDropFall 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  transform-origin: center center;
+  animation: waterDropToArrow 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 .drop-ripple {
   transform-box: fill-box;
   transform-origin: center;
   opacity: 0;
-  animation: waterRipple 2.6s ease-out infinite;
+  animation: waterRipple 4s ease-out infinite;
+}
+
+.arrow-group {
+  transform-box: fill-box;
+  transform-origin: center center;
+  opacity: 0;
+  animation: arrowMorphIn 4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.arrow-tray {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: arrowTraySpread 4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
 @keyframes logoDropIn {
@@ -239,66 +252,104 @@ body {
 }
 
 @keyframes logoSplashRing {
-  0%, 42% {
+  0%, 28% {
     transform: scale(0.9);
     opacity: 0;
   }
-  52% {
+  36% {
     opacity: 0.65;
   }
-  100% {
-    transform: scale(1.26);
+  62%, 100% {
+    transform: scale(1.28);
     opacity: 0;
   }
 }
 
-@keyframes waterDropFall {
+@keyframes waterDropToArrow {
   0% {
     opacity: 0;
     transform: translateY(-13px) scale(0.35);
   }
-  16% {
+  12% {
     opacity: 1;
-    transform: translateY(-10px) scale(0.84);
+    transform: translateY(-9px) scale(0.86);
   }
-  44% {
+  28% {
     opacity: 1;
-    transform: translateY(1px) scaleX(0.88) scaleY(1.12);
+    transform: translateY(1px) scaleX(0.86) scaleY(1.14);
   }
-  52% {
+  34% {
     opacity: 1;
-    transform: translateY(2.5px) scaleX(1.16) scaleY(0.82);
+    transform: translateY(3px) scaleX(1.18) scaleY(0.78);
   }
-  64% {
-    opacity: 1;
-    transform: translateY(-0.5px) scaleX(0.96) scaleY(1.04);
+  42% {
+    opacity: 0.7;
+    transform: translateY(-1px) scaleX(0.55) scaleY(1.18);
   }
-  82% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  100% {
+  48%, 100% {
     opacity: 0;
-    transform: translateY(4px) scale(0.8);
+    transform: translateY(0) scaleX(0.28) scaleY(1.25);
   }
 }
 
 @keyframes waterRipple {
-  0%, 46% {
+  0%, 30% {
     opacity: 0;
     transform: scaleX(0.35) scaleY(0.6);
   }
+  36% {
+    opacity: 0.85;
+    transform: scaleX(0.72) scaleY(0.88);
+  }
+  54%, 100% {
+    opacity: 0;
+    transform: scaleX(1.38) scaleY(1.15);
+  }
+}
+
+@keyframes arrowMorphIn {
+  0%, 36% {
+    opacity: 0;
+    transform: translateY(-3px) scale(0.55);
+  }
+  47% {
+    opacity: 1;
+    transform: translateY(1px) scale(1.06);
+  }
   54% {
-    opacity: 0.9;
-    transform: scaleX(0.7) scaleY(0.85);
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
-  84% {
-    opacity: 0;
-    transform: scaleX(1.38) scaleY(1.2);
+  66% {
+    opacity: 1;
+    transform: translateY(1.4px) scale(1);
   }
-  100% {
+  76% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  86% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  96%, 100% {
     opacity: 0;
-    transform: scaleX(1.4) scaleY(1.2);
+    transform: translateY(4px) scale(0.74);
+  }
+}
+
+@keyframes arrowTraySpread {
+  0%, 36% {
+    transform: scaleX(0.25);
+    opacity: 0;
+  }
+  48%, 86% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  96%, 100% {
+    transform: scaleX(0.5);
+    opacity: 0;
   }
 }
 
