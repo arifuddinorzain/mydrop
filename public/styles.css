@@ -742,6 +742,106 @@ body {
   transform: translateY(-1px);
 }
 
+.btn-download-all {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
+  animation:
+    downloadAllEnter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both,
+    downloadAllPulse 2.4s ease-in-out 0.45s infinite;
+}
+
+.btn-download-all::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 65%;
+  height: 100%;
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.36) 50%,
+    transparent 100%
+  );
+  transform: skewX(-20deg);
+  animation: downloadAllShine 2.8s ease-in-out 0.6s infinite;
+  pointer-events: none;
+}
+
+.btn-download-all:hover {
+  border-color: transparent;
+  color: #ffffff;
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.38);
+}
+
+.btn-download-all:active {
+  transform: scale(0.97);
+}
+
+.download-all-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.download-all-icon .dl-arrow {
+  animation: downloadArrowBob 1.5s ease-in-out infinite;
+}
+
+@keyframes downloadAllEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.88);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-1px) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes downloadAllPulse {
+  0%, 100% {
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28), 0 0 0 0 rgba(37, 99, 235, 0.35);
+  }
+  50% {
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.36), 0 0 0 6px rgba(37, 99, 235, 0);
+  }
+}
+
+@keyframes downloadAllShine {
+  0%, 45% {
+    left: -120%;
+  }
+  85%, 100% {
+    left: 160%;
+  }
+}
+
+@keyframes downloadArrowBob {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(1.8px);
+  }
+}
+
 /* Fullscreen QR Scanner */
 .scan-fullscreen {
   position: fixed;
