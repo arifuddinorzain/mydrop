@@ -211,6 +211,8 @@
     receiveList.innerHTML = '';
     sendList.innerHTML = '';
     receiveEmpty.classList.remove('hidden');
+    sendScanStage.classList.add('hidden');
+    sendScanStage.classList.remove('camera-blocked');
     btnDownloadAll.classList.add('hidden');
     btnSendFiles.classList.add('hidden');
     btnSendFiles.disabled = false;
@@ -413,12 +415,13 @@
   function startSendFlow(prefilledCode) {
     resetAll();
     showView('send');
-    sendScanStage.classList.remove('hidden');
     sendFilesStage.classList.add('hidden');
 
     if (prefilledCode) {
+      sendScanStage.classList.add('hidden');
       connectAsSender(prefilledCode);
     } else {
+      sendScanStage.classList.remove('hidden');
       setStatus(sendStatus, 'waiting', 'Imbas QR');
       startScanner();
     }
@@ -552,6 +555,7 @@
         setStatus(sendStatus, 'error', 'Ralat');
         showInlineError(sendErrorEl, msg || 'Ralat berlaku.');
         if (!sendFilesStage.classList.contains('hidden')) return;
+        sendScanStage.classList.remove('hidden');
         startScanner();
       },
     });

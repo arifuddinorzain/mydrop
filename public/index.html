@@ -2,7 +2,7 @@
 <html lang="ms">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>mydrop</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
@@ -125,65 +125,6 @@
 
       <div id="send-error" class="error-banner hidden" role="alert"></div>
 
-      <!-- STEP 1: FULLSCREEN QR SCANNER -->
-      <div id="send-scan-stage" class="scan-fullscreen">
-        <video id="qr-video" playsinline muted autoplay></video>
-        <canvas id="qr-scan-canvas" hidden></canvas>
-
-        <div id="camera-fallback-msg" class="camera-msg hidden">
-          <div class="camera-msg-card">
-            <div class="camera-off-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
-                <circle cx="12" cy="13" r="3" />
-              </svg>
-            </div>
-            <p id="camera-fallback-text"></p>
-            <button id="btn-retry-camera" class="btn-mini" type="button">Cuba lagi kamera</button>
-          </div>
-        </div>
-
-        <div class="scan-overlay">
-          <div class="scan-topbar">
-            <button id="btn-scan-back" class="btn-glass" type="button">← Kembali</button>
-            <span id="scan-status" class="status-pill glass waiting">
-              <span class="dot"></span>
-              <span class="status-text">Imbas QR</span>
-            </span>
-          </div>
-
-          <div class="scan-center">
-            <div class="scan-reticle" aria-hidden="true">
-              <span class="corner tl"></span>
-              <span class="corner tr"></span>
-              <span class="corner bl"></span>
-              <span class="corner br"></span>
-              <span class="scan-laser"></span>
-            </div>
-            <p class="scan-hint">Halakan kamera ke QR penerima</p>
-          </div>
-
-          <div class="scan-bottom">
-            <div id="scan-error" class="error-banner hidden" role="alert"></div>
-            <form id="manual-code-form" class="code-form" autocomplete="off">
-              <input
-                id="manual-code-input"
-                type="text"
-                inputmode="text"
-                maxlength="8"
-                placeholder="Kod (cth: A7F92C)"
-                aria-label="Kod sesi"
-              />
-              <button class="btn-secondary" type="submit">Sambung</button>
-            </form>
-            <label class="btn-upload-qr">
-              Imbas dari gambar QR
-              <input id="qr-image-input" type="file" accept="image/*" capture="environment" hidden />
-            </label>
-          </div>
-        </div>
-      </div>
-
       <!-- STEP 2: SELECT & SEND FILES -->
       <div id="send-files-stage" class="panel files-panel hidden">
         <div id="send-transfer-anim" class="transfer-hero hidden">
@@ -227,6 +168,65 @@
 
     <p id="toast" class="toast hidden" role="status" aria-live="polite"></p>
   </main>
+
+  <!-- FULLSCREEN QR SCANNER OVERLAY -->
+  <div id="send-scan-stage" class="scan-fullscreen hidden" role="dialog" aria-label="Imbas QR">
+    <video id="qr-video" playsinline muted autoplay></video>
+    <canvas id="qr-scan-canvas" hidden></canvas>
+
+    <div id="camera-fallback-msg" class="camera-msg hidden">
+      <div class="camera-msg-card">
+        <div class="camera-off-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+            <circle cx="12" cy="13" r="3" />
+          </svg>
+        </div>
+        <p id="camera-fallback-text"></p>
+        <button id="btn-retry-camera" class="btn-mini" type="button">Cuba lagi kamera</button>
+      </div>
+    </div>
+
+    <div class="scan-overlay">
+      <div class="scan-topbar">
+        <button id="btn-scan-back" class="btn-glass" type="button">← Kembali</button>
+        <span id="scan-status" class="status-pill glass waiting">
+          <span class="dot"></span>
+          <span class="status-text">Imbas QR</span>
+        </span>
+      </div>
+
+      <div class="scan-center">
+        <div class="scan-reticle" aria-hidden="true">
+          <span class="corner tl"></span>
+          <span class="corner tr"></span>
+          <span class="corner bl"></span>
+          <span class="corner br"></span>
+          <span class="scan-laser"></span>
+        </div>
+        <p class="scan-hint">Halakan kamera ke QR penerima</p>
+      </div>
+
+      <div class="scan-bottom">
+        <div id="scan-error" class="error-banner hidden" role="alert"></div>
+        <form id="manual-code-form" class="code-form" autocomplete="off">
+          <input
+            id="manual-code-input"
+            type="text"
+            inputmode="text"
+            maxlength="8"
+            placeholder="Kod (cth: A7F92C)"
+            aria-label="Kod sesi"
+          />
+          <button class="btn-secondary" type="submit">Sambung</button>
+        </form>
+        <label class="btn-upload-qr">
+          Imbas dari gambar QR
+          <input id="qr-image-input" type="file" accept="image/*" capture="environment" hidden />
+        </label>
+      </div>
+    </div>
+  </div>
 
   <script src="/vendor/qrcode.js"></script>
   <script src="/vendor/jsQR.js"></script>
