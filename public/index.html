@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="ms">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>mydrop</title>
   <link rel="stylesheet" href="/styles.css" />
 </head>
+
 <body>
   <div class="bg-ambient" aria-hidden="true">
     <span class="orb orb-1"></span>
@@ -27,14 +29,17 @@
   <main class="app">
     <header class="brand">
       <div class="brand-logo" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 3v12" />
-          <path d="m7 10 5 5 5-5" />
-          <path d="M5 19h14" />
+        <span class="logo-splash"></span>
+        <svg class="logo-drop-svg" viewBox="0 0 24 24" fill="none">
+          <ellipse class="drop-ripple" cx="12" cy="19.5" rx="6" ry="1.7" stroke="currentColor" stroke-width="1.6" />
+          <g class="drop-group">
+            <path class="drop-shape" d="M12 3.2C12 3.2 17.4 9.6 17.4 13.2A5.4 5.4 0 1 1 6.6 13.2C6.6 9.6 12 3.2 12 3.2Z" fill="currentColor" />
+            <path d="M9.6 13.6A2.6 2.6 0 0 0 11.4 16" stroke="rgba(37,99,235,0.45)" stroke-width="1.5" stroke-linecap="round" />
+          </g>
         </svg>
       </div>
-      <h1 class="brand-name">mydrop</h1>
-      <p class="brand-tag">Kongsi terus. Hilang bila refresh.</p>
+      <h1 class="brand-name">fastdrop</h1>
+      <p class="brand-tag">Kongsi terus. Resresh Hilang.</p>
     </header>
 
     <!-- HOME VIEW -->
@@ -42,7 +47,8 @@
       <div class="action-grid">
         <button id="btn-go-send" class="action-card action-send" type="button">
           <span class="action-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+              stroke-linejoin="round">
               <path d="M12 19V5" />
               <path d="m5 12 7-7 7 7" />
             </svg>
@@ -53,7 +59,8 @@
 
         <button id="btn-go-receive" class="action-card action-receive" type="button">
           <span class="action-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+              stroke-linejoin="round">
               <path d="M12 5v14" />
               <path d="m19 12-7 7-7-7" />
             </svg>
@@ -184,7 +191,8 @@
         <label id="drop-zone" class="drop-zone">
           <input id="file-input" type="file" multiple hidden />
           <span class="drop-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+              stroke-linejoin="round">
               <path d="M12 5v14" />
               <path d="M5 12h14" />
             </svg>
@@ -212,7 +220,8 @@
     <div id="camera-fallback-msg" class="camera-msg hidden">
       <div class="camera-msg-card">
         <div class="camera-off-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
             <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
             <circle cx="12" cy="13" r="3" />
           </svg>
@@ -245,14 +254,8 @@
       <div class="scan-bottom">
         <div id="scan-error" class="error-banner hidden" role="alert"></div>
         <form id="manual-code-form" class="code-form" autocomplete="off">
-          <input
-            id="manual-code-input"
-            type="text"
-            inputmode="text"
-            maxlength="8"
-            placeholder="Kod (cth: A7F92C)"
-            aria-label="Kod sesi"
-          />
+          <input id="manual-code-input" type="text" inputmode="text" maxlength="8" placeholder="Kod (cth: A7F92C)"
+            aria-label="Kod sesi" />
           <button class="btn-secondary" type="submit">Sambung</button>
         </form>
         <label class="btn-upload-qr">
@@ -269,4 +272,5 @@
   <script src="/js/transfer.js"></script>
   <script src="/js/app.js"></script>
 </body>
+
 </html>

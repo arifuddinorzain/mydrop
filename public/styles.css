@@ -176,25 +176,130 @@ body {
 }
 
 .brand-logo {
-  width: 50px;
-  height: 50px;
-  border-radius: 16px;
+  position: relative;
+  width: 54px;
+  height: 54px;
+  border-radius: 17px;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   display: grid;
   place-items: center;
   color: #fff;
   box-shadow: 0 12px 28px rgba(37, 99, 235, 0.28);
-  animation: logoFloat 3.6s ease-in-out infinite;
+  animation:
+    logoDropIn 0.72s cubic-bezier(0.22, 1, 0.36, 1) both,
+    logoFloat 3.6s ease-in-out 0.75s infinite;
+}
+
+.logo-splash {
+  position: absolute;
+  inset: -4px;
+  border-radius: 21px;
+  border: 2px solid rgba(37, 99, 235, 0.26);
+  pointer-events: none;
+  animation: logoSplashRing 2.6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
 .brand-logo svg {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
+  overflow: visible;
+}
+
+.drop-group {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: waterDropFall 2.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.drop-ripple {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: waterRipple 2.6s ease-out infinite;
+}
+
+@keyframes logoDropIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-34px) scale(0.78);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(3px) scaleX(1.06) scaleY(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes logoFloat {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
+}
+
+@keyframes logoSplashRing {
+  0%, 42% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  52% {
+    opacity: 0.65;
+  }
+  100% {
+    transform: scale(1.26);
+    opacity: 0;
+  }
+}
+
+@keyframes waterDropFall {
+  0% {
+    opacity: 0;
+    transform: translateY(-13px) scale(0.35);
+  }
+  16% {
+    opacity: 1;
+    transform: translateY(-10px) scale(0.84);
+  }
+  44% {
+    opacity: 1;
+    transform: translateY(1px) scaleX(0.88) scaleY(1.12);
+  }
+  52% {
+    opacity: 1;
+    transform: translateY(2.5px) scaleX(1.16) scaleY(0.82);
+  }
+  64% {
+    opacity: 1;
+    transform: translateY(-0.5px) scaleX(0.96) scaleY(1.04);
+  }
+  82% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.8);
+  }
+}
+
+@keyframes waterRipple {
+  0%, 46% {
+    opacity: 0;
+    transform: scaleX(0.35) scaleY(0.6);
+  }
+  54% {
+    opacity: 0.9;
+    transform: scaleX(0.7) scaleY(0.85);
+  }
+  84% {
+    opacity: 0;
+    transform: scaleX(1.38) scaleY(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1.4) scaleY(1.2);
+  }
 }
 
 @keyframes fadeDown {
