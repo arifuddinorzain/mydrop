@@ -40,6 +40,7 @@ test('mydrop server serves static assets, vendor libs, and WebSocket signaling',
       '/js/app.js',
       '/vendor/qrcode.js',
       '/vendor/jsQR.js',
+      '/vendor/peerjs.min.js',
       '/health',
     ];
     for (const p of paths) {

@@ -3,6 +3,9 @@
   const HIGH_WATER_MARK = 1024 * 1024; // 1 MB
   const LOW_WATER_MARK = 256 * 1024; // 256 KB
   const P2P_TIMEOUT_MS = 4500;
+  const PEERJS_CONNECT_TIMEOUT_MS = 12000;
+  const PEER_PREFIX = 'mydrop-v1-';
+  const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
   const RTC_CONFIG = {
     iceServers: [
@@ -11,12 +14,40 @@
     ],
   };
 
+  function randomCode(length = 6) {
+    const bytes = new Uint8Array(length);
+    crypto.getRandomValues(bytes);
+    let out = '';
+    for (let i = 0; i < length; i++) {
+      out += CODE_CHARS[bytes[i] % CODE_CHARS.length];
+    }
+    return out;
+  }
+
+  async function hasLocalSignalingServer() {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 1200);
+    try {
+      const res = await fetch('/health', { cache: 'no-store', signal: controller.signal });
+      if (!res.ok) return false;
+      const json = await res.json().catch(() => null);
+      return Boolean(json && json.ok === true);
+    } catch {
+      return false;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   class MyDropSession {
     constructor(callbacks = {}) {
       this.cb = callbacks;
+      this.backend = 'ws'; // 'ws' (local server) or 'peerjs' (static/Vercel)
       this.ws = null;
       this.pc = null;
       this.dc = null;
+      this.peer = null;
+      this.peerConn = null;
       this.role = null;
       this.code = null;
       this.activePeerId = null;
@@ -26,11 +57,15 @@
       this.connected = false;
       this.mode = 'p2p'; // 'p2p' or 'relay'
       this.p2pTimer = null;
+      this.peerConnectTimer = null;
+      this.rxChain = Promise.resolve();
 
       // Receiver-side active incoming file state (RAM only)
       this.incoming = null;
       this.receivedUrls = [];
     }
+
+    // ---------------- LOCAL WS BACKEND ----------------
 
     connectWebSocket() {
       return new Promise((resolve, reject) => {
@@ -55,7 +90,7 @@
         };
         ws.onclose = () => {
           if (!this.closed) {
-            this.clearP2PTimer();
+            this.clearTimers();
             this.cb.onDisconnected?.('Sambungan ke pelayan terputus.');
           }
         };
@@ -68,24 +103,28 @@
       }
     }
 
-    clearP2PTimer() {
+    clearTimers() {
       if (this.p2pTimer) {
         clearTimeout(this.p2pTimer);
         this.p2pTimer = null;
+      }
+      if (this.peerConnectTimer) {
+        clearTimeout(this.peerConnectTimer);
+        this.peerConnectTimer = null;
       }
     }
 
     markConnected(mode) {
       if (this.connected || this.closed) return;
-      this.clearP2PTimer();
+      this.clearTimers();
       this.connected = true;
       this.mode = mode;
       this.cb.onConnected?.(mode);
     }
 
     activateRelayFallback() {
-      if (this.closed || this.connected) return;
-      this.clearP2PTimer();
+      if (this.closed || this.connected || this.backend !== 'ws') return;
+      this.clearTimers();
       this.closePeer();
       this.mode = 'relay';
       if (this.role === 'sender') {
@@ -94,10 +133,21 @@
       }
     }
 
+    // ---------------- PUBLIC ENTRYPOINTS ----------------
+
     async startReceiver() {
       this.role = 'receiver';
-      await this.connectWebSocket();
-      this.sendSignal({ type: 'create-room' });
+      const useLocal = await hasLocalSignalingServer();
+      if (this.closed) return;
+
+      if (useLocal) {
+        this.backend = 'ws';
+        await this.connectWebSocket();
+        this.sendSignal({ type: 'create-room' });
+      } else {
+        this.backend = 'peerjs';
+        await this.startPeerJsReceiver();
+      }
     }
 
     async startSender(code) {
@@ -106,9 +156,178 @@
       if (!this.code) {
         throw new Error('Kod sesi tidak sah.');
       }
-      await this.connectWebSocket();
-      this.sendSignal({ type: 'join-room', code: this.code });
+
+      const useLocal = await hasLocalSignalingServer();
+      if (this.closed) return;
+
+      if (useLocal) {
+        this.backend = 'ws';
+        await this.connectWebSocket();
+        this.sendSignal({ type: 'join-room', code: this.code });
+      } else {
+        this.backend = 'peerjs';
+        await this.startPeerJsSender(this.code);
+      }
     }
+
+    // ---------------- PEERJS SERVERLESS BACKEND (VERCEL) ----------------
+
+    startPeerJsReceiver(attempt = 0) {
+      return new Promise((resolve, reject) => {
+        if (typeof global.Peer !== 'function') {
+          reject(new Error('Pustaka sambungan P2P tidak dimuatkan.'));
+          return;
+        }
+
+        const code = randomCode(6);
+        const peer = new global.Peer(`${PEER_PREFIX}${code}`, {
+          debug: 0,
+          config: RTC_CONFIG,
+        });
+        this.peer = peer;
+        let opened = false;
+
+        peer.on('open', () => {
+          if (this.closed) return;
+          opened = true;
+          this.code = code;
+          this.cb.onRoomCreated?.(code, location.origin);
+          resolve();
+        });
+
+        peer.on('connection', (conn) => {
+          if (this.closed) {
+            try { conn.close(); } catch {}
+            return;
+          }
+          this.attachPeerJsConnection(conn);
+        });
+
+        peer.on('error', (err) => {
+          if (this.closed) return;
+          if (!opened && err?.type === 'unavailable-id' && attempt < 3) {
+            try { peer.destroy(); } catch {}
+            this.startPeerJsReceiver(attempt + 1).then(resolve, reject);
+            return;
+          }
+          const msg = err?.message || 'Ralat pelayan sambungan P2P.';
+          if (!opened) {
+            reject(new Error(msg));
+          } else {
+            this.cb.onError?.(msg);
+          }
+        });
+
+        peer.on('disconnected', () => {
+          if (!this.closed && !this.connected) {
+            try { peer.reconnect(); } catch {}
+          }
+        });
+      });
+    }
+
+    startPeerJsSender(code) {
+      return new Promise((resolve, reject) => {
+        if (typeof global.Peer !== 'function') {
+          reject(new Error('Pustaka sambungan P2P tidak dimuatkan.'));
+          return;
+        }
+
+        const peer = new global.Peer(undefined, {
+          debug: 0,
+          config: RTC_CONFIG,
+        });
+        this.peer = peer;
+        let opened = false;
+
+        peer.on('open', () => {
+          if (this.closed) return;
+          opened = true;
+          const conn = peer.connect(`${PEER_PREFIX}${code}`, {
+            reliable: true,
+            serialization: 'raw',
+          });
+          this.attachPeerJsConnection(conn);
+
+          this.peerConnectTimer = setTimeout(() => {
+            if (!this.connected && !this.closed) {
+              this.cb.onError?.('Sambungan P2P tamat masa. Pastikan kedua-dua peranti boleh guna WebRTC.');
+            }
+          }, PEERJS_CONNECT_TIMEOUT_MS);
+
+          resolve();
+        });
+
+        peer.on('error', (err) => {
+          if (this.closed) return;
+          this.clearTimers();
+          let msg = err?.message || 'Gagal menyambung P2P.';
+          if (err?.type === 'peer-unavailable') {
+            msg = `Kod sesi "${code}" tidak dijumpai atau sudah tamat.`;
+          }
+          if (!opened) {
+            reject(new Error(msg));
+          } else {
+            this.cb.onError?.(msg);
+          }
+        });
+      });
+    }
+
+    attachPeerJsConnection(conn) {
+      this.peerConn = conn;
+
+      conn.on('open', () => {
+        if (this.closed) return;
+        this.dc = conn.dataChannel || null;
+        if (this.dc) {
+          this.dc.binaryType = 'arraybuffer';
+          this.dc.bufferedAmountLowThreshold = LOW_WATER_MARK;
+        }
+        this.markConnected('p2p');
+      });
+
+      conn.on('data', (data) => {
+        this.rxChain = this.rxChain.then(() => this.handlePeerData(data)).catch(() => {});
+      });
+
+      conn.on('close', () => {
+        if (!this.closed) {
+          this.clearTimers();
+          this.incoming = null;
+          this.cb.onDisconnected?.('Sambungan P2P ditutup.');
+        }
+      });
+
+      conn.on('error', (err) => {
+        if (!this.closed) {
+          this.clearTimers();
+          this.cb.onError?.(err?.message || 'Ralat saluran pemindahan.');
+        }
+      });
+    }
+
+    async handlePeerData(data) {
+      if (typeof data === 'string') {
+        this.handleDataMessage(data);
+        return;
+      }
+      if (data instanceof ArrayBuffer) {
+        this.handleDataMessage(data);
+        return;
+      }
+      if (ArrayBuffer.isView(data)) {
+        const copy = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+        this.handleDataMessage(copy);
+        return;
+      }
+      if (typeof Blob !== 'undefined' && data instanceof Blob) {
+        const buf = await data.arrayBuffer();
+        this.handleDataMessage(buf);
+      }
+    }
+
+    // ---------------- LOCAL WEBRTC PEERCONNECTION ----------------
 
     createPeerConnection(peerId) {
       this.closePeer();
@@ -182,7 +401,7 @@
       };
 
       dc.onmessage = (event) => {
-        this.handleDataMessage(event.data);
+        this.rxChain = this.rxChain.then(() => this.handlePeerData(event.data)).catch(() => {});
       };
     }
 
@@ -300,7 +519,7 @@
           }
 
           case 'error': {
-            this.clearP2PTimer();
+            this.clearTimers();
             this.cb.onError?.(msg.message || 'Ralat sesi.');
             break;
           }
@@ -321,6 +540,8 @@
         await this.pc.addIceCandidate(candidate).catch(() => {});
       }
     }
+
+    // ---------------- SHARED DATA TRANSFER PROTOCOL ----------------
 
     handleControlMessage(ctrl) {
       if (ctrl.type === 'file-start') {
@@ -418,6 +639,9 @@
       if (this.mode === 'relay') {
         return Boolean(this.ws && this.ws.readyState === WebSocket.OPEN);
       }
+      if (this.backend === 'peerjs') {
+        return Boolean(this.peerConn && this.peerConn.open);
+      }
       return Boolean(this.dc && this.dc.readyState === 'open');
     }
 
@@ -431,16 +655,20 @@
     sendControl(ctrl) {
       if (this.mode === 'relay') {
         this.sendSignal({ type: 'relay-ctrl', ctrl });
-      } else {
+      } else if (this.dc && this.dc.readyState === 'open') {
         this.dc.send(JSON.stringify(ctrl));
+      } else if (this.peerConn && this.peerConn.open) {
+        this.peerConn.send(JSON.stringify(ctrl));
       }
     }
 
     sendBinary(buffer) {
       if (this.mode === 'relay') {
         this.ws.send(buffer);
-      } else {
+      } else if (this.dc && this.dc.readyState === 'open') {
         this.dc.send(buffer);
+      } else if (this.peerConn && this.peerConn.open) {
+        this.peerConn.send(buffer);
       }
     }
 
@@ -500,10 +728,18 @@
 
     close() {
       this.closed = true;
-      this.clearP2PTimer();
+      this.clearTimers();
       this.incoming = null;
       this.sendSignal({ type: 'leave' });
       this.closePeer();
+      if (this.peerConn) {
+        try { this.peerConn.close(); } catch {}
+        this.peerConn = null;
+      }
+      if (this.peer) {
+        try { this.peer.destroy(); } catch {}
+        this.peer = null;
+      }
       if (this.ws) {
         try { this.ws.close(); } catch {}
         this.ws = null;
