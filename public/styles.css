@@ -103,6 +103,57 @@ body {
   to { transform: translate(35px, 35px) scale(1.15); }
 }
 
+.bg-waves {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: min(42vh, 320px);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg-wave {
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 200%;
+  height: 100%;
+  will-change: transform;
+}
+
+.bg-wave-1 path {
+  fill: rgba(99, 102, 241, 0.08);
+}
+
+.bg-wave-2 path {
+  fill: rgba(59, 130, 246, 0.1);
+}
+
+.bg-wave-3 path {
+  fill: rgba(16, 185, 129, 0.075);
+}
+
+.bg-wave-1 {
+  animation: bgWaveDrift 18s linear infinite;
+}
+
+.bg-wave-2 {
+  height: 86%;
+  animation: bgWaveDrift 12s linear infinite reverse;
+}
+
+.bg-wave-3 {
+  height: 70%;
+  animation: bgWaveDrift 9s linear infinite;
+}
+
+@keyframes bgWaveDrift {
+  0% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-25%, -6px, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
 .app {
   position: relative;
   z-index: 1;
