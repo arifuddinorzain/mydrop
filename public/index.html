@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>mydrop</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="brand">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v12" />
+          <path d="m7 10 5 5 5-5" />
+          <path d="M5 19h14" />
+        </svg>
+      </div>
+      <h1 class="brand-name">mydrop</h1>
+      <p class="brand-tag">Kongsi terus. Hilang bila refresh.</p>
+    </header>
+
+    <!-- HOME VIEW -->
+    <section id="view-home" class="view active" aria-label="Utama">
+      <div class="action-grid">
+        <button id="btn-go-send" class="action-card action-send" type="button">
+          <span class="action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 19V5" />
+              <path d="m5 12 7-7 7 7" />
+            </svg>
+          </span>
+          <span class="action-title">Send</span>
+          <span class="action-sub">Imbas QR &amp; hantar</span>
+        </button>
+
+        <button id="btn-go-receive" class="action-card action-receive" type="button">
+          <span class="action-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14" />
+              <path d="m19 12-7 7-7-7" />
+            </svg>
+          </span>
+          <span class="action-title">Receive</span>
+          <span class="action-sub">Tunjuk QR &amp; terima</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- RECEIVE VIEW -->
+    <section id="view-receive" class="view" aria-label="Terima fail">
+      <div class="topbar">
+        <button id="btn-receive-back" class="btn-ghost" type="button">← Kembali</button>
+        <span id="receive-status" class="status-pill waiting">
+          <span class="dot"></span>
+          <span class="status-text">Menunggu...</span>
+        </span>
+      </div>
+
+      <div id="receive-error" class="error-banner hidden" role="alert"></div>
+
+      <div id="receive-qr-box" class="panel qr-panel">
+        <div class="qr-frame">
+          <canvas id="qr-canvas"></canvas>
+        </div>
+        <p class="hint">Imbas QR ini dari peranti penghantar</p>
+        <div class="code-row">
+          <span class="code-label">Kod:</span>
+          <code id="receive-code" class="code-value">------</code>
+          <button id="btn-copy-link" class="btn-mini" type="button" title="Salin pautan">Salin</button>
+        </div>
+      </div>
+
+      <div id="receive-files-box" class="panel files-panel hidden">
+        <div class="panel-head">
+          <span class="panel-title">Fail diterima</span>
+          <button id="btn-download-all" class="btn-mini hidden" type="button">Muat turun semua</button>
+        </div>
+        <div id="receive-empty" class="empty-state">
+          Menunggu pengirim pilih fail...
+        </div>
+        <ul id="receive-list" class="file-list"></ul>
+        <p class="ephemeral-note">Tiada fail disimpan. Hilang automatik bila refresh.</p>
+      </div>
+    </section>
+
+    <!-- SEND VIEW -->
+    <section id="view-send" class="view" aria-label="Hantar fail">
+      <div class="topbar">
+        <button id="btn-send-back" class="btn-ghost" type="button">← Kembali</button>
+        <span id="send-status" class="status-pill waiting">
+          <span class="dot"></span>
+          <span class="status-text">Imbas QR</span>
+        </span>
+      </div>
+
+      <div id="send-error" class="error-banner hidden" role="alert"></div>
+
+      <!-- STEP 1: SCAN QR -->
+      <div id="send-scan-stage" class="panel scan-panel">
+        <div id="camera-wrap" class="camera-wrap">
+          <video id="qr-video" playsinline muted autoplay></video>
+          <div class="scan-reticle" aria-hidden="true"></div>
+          <div id="camera-fallback-msg" class="camera-msg hidden"></div>
+        </div>
+        <canvas id="qr-scan-canvas" hidden></canvas>
+        <p class="hint">Halakan kamera ke QR penerima</p>
+
+        <div class="divider"><span>atau</span></div>
+
+        <form id="manual-code-form" class="code-form" autocomplete="off">
+          <input
+            id="manual-code-input"
+            type="text"
+            inputmode="text"
+            maxlength="8"
+            placeholder="Kod (cth: A7F92C)"
+            aria-label="Kod sesi"
+          />
+          <button class="btn-secondary" type="submit">Sambung</button>
+        </form>
+
+        <label class="btn-upload-qr">
+          Imbas dari gambar QR
+          <input id="qr-image-input" type="file" accept="image/*" capture="environment" hidden />
+        </label>
+      </div>
+
+      <!-- STEP 2: SELECT & SEND FILES -->
+      <div id="send-files-stage" class="panel files-panel hidden">
+        <label id="drop-zone" class="drop-zone">
+          <input id="file-input" type="file" multiple hidden />
+          <span class="drop-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14" />
+              <path d="M5 12h14" />
+            </svg>
+          </span>
+          <span class="drop-title">Pilih gambar, video atau fail</span>
+          <span class="drop-sub">Sebarang jenis fail disokong</span>
+        </label>
+
+        <ul id="send-list" class="file-list"></ul>
+
+        <button id="btn-send-files" class="btn-primary hidden" type="button">
+          Hantar fail
+        </button>
+      </div>
+    </section>
+
+    <p id="toast" class="toast hidden" role="status" aria-live="polite"></p>
+  </main>
+
+  <script src="/vendor/qrcode.js"></script>
+  <script src="/vendor/jsQR.js"></script>
+  <script src="/js/transfer.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
