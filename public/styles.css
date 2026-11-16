@@ -1124,6 +1124,52 @@ body {
   height: min(56vw, 204px);
   display: block;
   border-radius: 8px;
+  transition: opacity 0.24s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#qr-canvas.is-loading {
+  opacity: 0;
+  transform: scale(0.94);
+}
+
+.qr-loading {
+  position: absolute;
+  inset: 15px;
+  border-radius: 12px;
+  background: linear-gradient(155deg, rgba(241, 245, 249, 0.88), rgba(226, 232, 240, 0.56));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 2;
+}
+
+.qr-spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(37, 99, 235, 0.16);
+  border-top-color: var(--accent);
+  border-right-color: var(--accent-2);
+  animation: qrSpin 0.8s linear infinite;
+}
+
+.qr-loading-text {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+}
+
+@keyframes qrSpin {
+  to { transform: rotate(360deg); }
+}
+
+.btn-mini:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .hint {

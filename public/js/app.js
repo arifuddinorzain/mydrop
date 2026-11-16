@@ -20,6 +20,7 @@
   const receiveErrorEl = $('receive-error');
   const receiveQrBox = $('receive-qr-box');
   const qrCanvas = $('qr-canvas');
+  const qrLoading = $('qr-loading');
   const receiveCodeEl = $('receive-code');
   const btnCopyLink = $('btn-copy-link');
   const btnShareQr = $('btn-share-qr');
@@ -267,12 +268,32 @@
 
   // ---------------- RECEIVE FLOW ----------------
 
+  function setQrLoading(isLoading) {
+    if (qrLoading) {
+      qrLoading.classList.toggle('hidden', !isLoading);
+    }
+    qrCanvas.classList.toggle('is-loading', Boolean(isLoading));
+    if (isLoading) {
+      const ctx = qrCanvas.getContext('2d');
+      if (ctx && qrCanvas.width > 0 && qrCanvas.height > 0) {
+        ctx.clearRect(0, 0, qrCanvas.width, qrCanvas.height);
+      }
+      btnCopyLink.disabled = true;
+      if (btnShareQr) btnShareQr.disabled = true;
+    } else {
+      const hasCode = receiveCodeEl.textContent.trim() !== '' && receiveCodeEl.textContent.trim() !== '------';
+      btnCopyLink.disabled = !hasCode;
+      if (btnShareQr) btnShareQr.disabled = !hasCode;
+    }
+  }
+
   async function startReceiveFlow() {
     resetAll();
     showView('receive');
     receiveQrBox.classList.remove('hidden');
     receiveFilesBox.classList.add('hidden');
     receiveCodeEl.textContent = '------';
+    setQrLoading(true);
     setStatus(receiveStatus, 'waiting', 'Menyediakan QR...');
 
     currentSession = new MyDropSession({
@@ -281,6 +302,7 @@
         receiveCodeEl.textContent = code;
         const shareUrl = `${currentShareOrigin}/?join=${code}`;
         renderQRCode(shareUrl);
+        setQrLoading(false);
         setStatus(receiveStatus, 'waiting', 'Menunggu...');
       },
       onConnected() {
@@ -393,6 +415,7 @@
     try {
       await currentSession.startReceiver();
     } catch (err) {
+      setQrLoading(false);
       setStatus(receiveStatus, 'error', 'Ralat');
       showInlineError(receiveErrorEl, err.message || 'Gagal memulakan sesi.');
     }
