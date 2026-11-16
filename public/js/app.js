@@ -11,6 +11,8 @@
   // Home elements
   const btnGoSend = $('btn-go-send');
   const btnGoReceive = $('btn-go-receive');
+  const airdropTopWave = $('airdrop-top-wave');
+  let airdropDoneTimer = null;
 
   // Receive elements
   const btnReceiveBack = $('btn-receive-back');
@@ -174,6 +176,32 @@
     }
   }
 
+  function setAirdropWave(mode) {
+    if (!airdropTopWave) return;
+    clearTimeout(airdropDoneTimer);
+    airdropDoneTimer = null;
+
+    if (mode === 'idle') {
+      airdropTopWave.classList.remove('is-active', 'is-sending', 'is-receiving', 'is-done');
+      return;
+    }
+
+    airdropTopWave.classList.add('is-active');
+    if (mode === 'sending' || mode === 'receiving') {
+      airdropTopWave.classList.toggle('is-sending', mode === 'sending');
+      airdropTopWave.classList.toggle('is-receiving', mode === 'receiving');
+      airdropTopWave.classList.remove('is-done');
+      return;
+    }
+
+    if (mode === 'done') {
+      airdropTopWave.classList.add('is-done');
+      airdropDoneTimer = setTimeout(() => {
+        setAirdropWave('idle');
+      }, 1800);
+    }
+  }
+
   function setHeroProgress(heroEl, labelEl, pctEl, barEl, pct, labelText, completed) {
     heroEl.classList.remove('hidden');
     heroEl.classList.toggle('completed', Boolean(completed));
@@ -181,6 +209,8 @@
     pctEl.textContent = `${pct}%`;
     barEl.style.width = `${pct}%`;
     barEl.classList.toggle('done', Boolean(completed));
+    const mode = completed ? 'done' : (heroEl === sendTransferAnim ? 'sending' : 'receiving');
+    setAirdropWave(mode);
   }
 
   function resetHero(heroEl, pctEl, barEl) {
@@ -189,6 +219,7 @@
     pctEl.textContent = '0%';
     barEl.style.width = '0%';
     barEl.classList.remove('done');
+    setAirdropWave('idle');
   }
 
   function resetAll() {
@@ -348,6 +379,7 @@
         }
       },
       onDisconnected(reason) {
+        setAirdropWave('idle');
         setStatus(receiveStatus, 'error', 'Terputus');
         showInlineError(receiveErrorEl, reason || 'Sambungan terputus.');
       },
@@ -548,6 +580,7 @@
         }
       },
       onDisconnected(reason) {
+        setAirdropWave('idle');
         setStatus(sendStatus, 'error', 'Terputus');
         showInlineError(sendErrorEl, reason || 'Sambungan terputus.');
       },
@@ -735,6 +768,7 @@
       );
       showToast('Semua fail berjaya dihantar');
     } catch (err) {
+      setAirdropWave('idle');
       showInlineError(sendErrorEl, err.message || 'Gagal menghantar fail');
     } finally {
       isSending = false;
