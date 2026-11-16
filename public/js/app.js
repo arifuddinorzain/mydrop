@@ -22,6 +22,7 @@
   const qrCanvas = $('qr-canvas');
   const receiveCodeEl = $('receive-code');
   const btnCopyLink = $('btn-copy-link');
+  const btnShareQr = $('btn-share-qr');
   const receiveFilesBox = $('receive-files-box');
   const receiveTransferAnim = $('receive-transfer-anim');
   const receiveOverallLabel = $('receive-overall-label');
@@ -424,6 +425,74 @@
       await navigator.clipboard.writeText(url);
       showToast('Pautan disalin');
     } catch {
+      showToast(`Kod: ${code}`);
+    }
+  });
+
+  function canvasToPngBlob(canvas) {
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => resolve(blob), 'image/png');
+    });
+  }
+
+  btnShareQr?.addEventListener('click', async () => {
+    const code = receiveCodeEl.textContent.trim();
+    if (!code || code === '------') return;
+
+    const url = `${currentShareOrigin}/?join=${code}`;
+    const filename = `fastdrop-qr-${code}.png`;
+    const blob = await canvasToPngBlob(qrCanvas);
+
+    if (navigator.share) {
+      try {
+        if (blob) {
+          const qrFile = new File([blob], filename, { type: 'image/png' });
+          if (navigator.canShare && navigator.canShare({ files: [qrFile] })) {
+            await navigator.share({
+              title: 'fastdrop',
+              text: `Imbas QR atau guna kod ${code} di ${url}`,
+              files: [qrFile],
+            });
+            return;
+          }
+        }
+        await navigator.share({
+          title: 'fastdrop',
+          text: `Guna kod ${code} atau imbas QR untuk hantar fail:`,
+          url,
+        });
+        return;
+      } catch (err) {
+        if (err && err.name === 'AbortError') return;
+      }
+    }
+
+    if (blob) {
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => {
+        try { URL.revokeObjectURL(blobUrl); } catch {}
+      }, 1000);
+    }
+
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(url);
+      copied = true;
+    } catch {}
+
+    if (blob && copied) {
+      showToast('Gambar QR dimuat turun & pautan disalin');
+    } else if (blob) {
+      showToast('Gambar QR dimuat turun untuk dikongsi');
+    } else if (copied) {
+      showToast('Pautan disalin');
+    } else {
       showToast(`Kod: ${code}`);
     }
   });

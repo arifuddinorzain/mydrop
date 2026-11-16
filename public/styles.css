@@ -1134,7 +1134,9 @@ body {
 
 .code-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   font-size: 0.85rem;
   color: var(--muted);
@@ -1185,6 +1187,22 @@ body {
     0 8px 16px -4px rgba(37, 99, 235, 0.18),
     0 0 0 1px rgba(37, 99, 235, 0.15),
     inset 0 1.5px 1.5px rgba(255, 255, 255, 1);
+}
+
+.btn-icon-share {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: var(--accent);
+}
+
+.btn-icon-share svg {
+  width: 15px;
+  height: 15px;
+  display: block;
 }
 
 .btn-download-all {
