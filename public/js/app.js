@@ -680,23 +680,33 @@
     connectAsSender(code);
   });
 
+  function scanImageAtMaxDim(img, maxDim) {
+    const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+    const w = Math.max(1, Math.round(img.width * scale));
+    const h = Math.max(1, Math.round(img.height * scale));
+    qrScanCanvas.width = w;
+    qrScanCanvas.height = h;
+    const ctx = qrScanCanvas.getContext('2d', { willReadFrequently: true });
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, w, h);
+    ctx.drawImage(img, 0, 0, w, h);
+    const data = ctx.getImageData(0, 0, w, h);
+    return jsQR(data.data, w, h, { inversionAttempts: 'attemptBoth' });
+  }
+
   qrImageInput.addEventListener('change', (e) => {
     const file = e.target.files?.[0];
+    qrImageInput.value = '';
     if (!file) return;
+    clearInlineErrors();
     const img = new Image();
     const url = URL.createObjectURL(file);
     img.onload = () => {
       URL.revokeObjectURL(url);
-      const maxDim = 1024;
-      const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
-      const w = Math.max(1, Math.round(img.width * scale));
-      const h = Math.max(1, Math.round(img.height * scale));
-      qrScanCanvas.width = w;
-      qrScanCanvas.height = h;
-      const ctx = qrScanCanvas.getContext('2d', { willReadFrequently: true });
-      ctx.drawImage(img, 0, 0, w, h);
-      const data = ctx.getImageData(0, 0, w, h);
-      const result = jsQR(data.data, w, h, { inversionAttempts: 'attemptBoth' });
+      let result = scanImageAtMaxDim(img, 1280);
+      if (!result && Math.max(img.width, img.height) > 640) {
+        result = scanImageAtMaxDim(img, 640);
+      }
       const code = result ? extractSessionCode(result.data) : '';
       if (code) {
         connectAsSender(code);
